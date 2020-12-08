@@ -82,7 +82,7 @@ def main():
     checkpoint_dir = args["--checkpoint-dir"]
     data_root = args["--data-root"]
     dataset_name = args["--dataset"]
-    assert dataset_name in ["blizzard2012", "ljspeech"]
+    assert dataset_name in ["vqcodes"]
     corpus = importlib.import_module("datasets." + dataset_name)
     corpus_instance = corpus.instantiate(in_dir="", out_dir=data_root)
 

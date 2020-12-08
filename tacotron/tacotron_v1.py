@@ -123,11 +123,9 @@ class DecoderV1(tf.layers.Layer):
                          for out_unit in self._prenet_out_units])
 
         batch_size = tf.shape(source)[0]
-        attention_cell = AttentionRNNV1(self.attention_out_units, prenets, source, memory_sequence_length,
-                                        dtype=self.dtype)
+        attention_cell = AttentionRNNV1(self.attention_out_units, prenets, source, memory_sequence_length,dtype=self.dtype)
         decoder_cell = DecoderRNNV1(self.decoder_out_units, attention_cell, dtype=self.dtype)
-        output_and_done_cell = OutputAndStopTokenWrapper(decoder_cell, self.num_mels * self.outputs_per_step,
-                                                         dtype=self.dtype)
+        output_and_done_cell = OutputAndStopTokenWrapper(decoder_cell, self.num_mels * self.outputs_per_step,dtype=self.dtype)
 
         decoder_initial_state = output_and_done_cell.zero_state(batch_size, dtype=source.dtype)
 
@@ -149,38 +147,8 @@ class DecoderV1(tf.layers.Layer):
         ((decoder_outputs, stop_token), _), final_decoder_state, _ = tf.contrib.seq2seq.dynamic_decode(
             BasicDecoder(output_and_done_cell, helper, decoder_initial_state), maximum_iterations=self.max_iters)
 
-        mel_output = tf.reshape(decoder_outputs, [batch_size, -1, self.num_mels])
-        return mel_output, stop_token, final_decoder_state
+        code_output = tf.reshape(decoder_outputs, [batch_size, -1, self.num_mels])
+        return code_output, stop_token, final_decoder_state
 
 
-class PostNet(tf.layers.Layer):
 
-    def __init__(self, is_training,
-                 num_freq,
-                 cbhg_out_units=256, conv_channels=128, max_filter_width=8,
-                 projection1_out_channels=256,
-                 projection2_out_channels=80,
-                 num_highway=4,
-                 trainable=True, name=None, dtype=None, **kwargs):
-        super(PostNet, self).__init__(trainable=trainable, name=name, dtype=dtype, **kwargs)
-        self.cbhg = CBHG(cbhg_out_units,
-                         conv_channels,
-                         max_filter_width,
-                         projection1_out_channels,
-                         projection2_out_channels,
-                         num_highway,
-                         is_training,
-                         dtype=dtype)
-
-        self.linear = tf.layers.Dense(num_freq, dtype=dtype)
-
-    def build(self, _):
-        self.built = True
-
-    def call(self, inputs, **kwargs):
-        cbhg_output = self.cbhg(inputs)
-        dense_output = self.linear(cbhg_output)
-        return dense_output
-
-    def compute_output_shape(self, input_shape):
-        return self.linear.compute_output_shape(input_shape)
