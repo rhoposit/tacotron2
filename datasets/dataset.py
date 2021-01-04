@@ -8,8 +8,8 @@
 import tensorflow as tf
 from collections import namedtuple
 from abc import abstractmethod
-from util.tfrecord import decode_preprocessed_source_data, decode_preprocessed_target_data, \
-    parse_preprocessed_source_data, parse_preprocessed_target_data, \
+from util.tfrecord import decode_preprocessed_source_data, decode_preprocessed_target_data2, \
+    parse_preprocessed_source_data, parse_preprocessed_target_data2, \
     PreprocessedSourceData, PreprocessedTargetData
 
 

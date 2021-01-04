@@ -109,7 +109,41 @@ class OutputAndStopTokenWrapper(RNNCell):
         return (mel_output, stop_token), res_state
 
 
+class AttentionRNN(RNNCell):
 
+    def __init__(self, cell, prenets: Tuple[PreNet],
+                 attention_mechanism,
+                 trainable=True, name=None, dtype=None, **kwargs):
+        super(AttentionRNN, self).__init__(trainable=trainable, name=name, dtype=dtype, **kwargs)
+        attention_cell = AttentionWrapper(
+            cell,
+            attention_mechanism,
+            alignment_history=True,
+            output_attention=False)
+        # prenet -> attention
+        prenet_cell = DecoderPreNetWrapper(attention_cell, prenets)
+        # prenet -> attention -> concat
+        concat_cell = ConcatOutputAndAttentionWrapper(prenet_cell)
+        self._cell = concat_cell
+
+    @property
+    def state_size(self):
+        return self._cell.state_size
+
+    @property
+    def output_size(self):
+        return self._cell.output_size
+
+    def zero_state(self, batch_size, dtype):
+        return self._cell.zero_state(batch_size, dtype)
+
+    def compute_output_shape(self, input_shape):
+        return tf.TensorShape([input_shape[0], input_shape[1], self.output_size])
+
+    def call(self, inputs, state):
+        return self._cell(inputs, state)
+
+    
 class OutputProjectionWrapper(RNNCell):
     """ Compatible with tensorflow.contrib.rnn.OutputProjectionWrapper.
     Support dtype argument as other RNNCells do.

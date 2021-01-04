@@ -86,6 +86,7 @@ def main():
     corpus = importlib.import_module("datasets." + dataset_name)
     corpus_instance = corpus.instantiate(in_dir="", out_dir=data_root)
 
+    print(hparams_debug_string())
     hparams.parse(args["--hparams"])
     print(hparams_debug_string())
 

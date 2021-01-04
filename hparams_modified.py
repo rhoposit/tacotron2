@@ -9,7 +9,6 @@
 import tensorflow as tf
 
 hparams = tf.contrib.training.HParams(
-
     # Dataset
     num_symbols=256,
     convert_to_upper=True,
