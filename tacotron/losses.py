@@ -28,14 +28,7 @@ def mse_loss(y_hat, y, mask):
 
 
 def codes_loss(y_hat, y, mask, codes_loss_type):
-    if codes_loss_type == "l1":
-        y_hat = tf.squeeze(y_hat)
-        
-        return l1_loss(y_hat, y, mask)
-    elif codes_loss_type == "mse":
-        return mse_loss(y_hat, y, mask)
-    else:
-        raise ValueError(f"Unknown loss type: {codes_loss_type}")
+    return tf.losses.softmax_cross_entropy(y, y_hat, weights=mask)
 
 
 def classification_loss(y_hat, y, mask):
