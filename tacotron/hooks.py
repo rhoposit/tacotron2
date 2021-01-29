@@ -15,7 +15,7 @@ from util.tfrecord import write_tfrecord, int64_feature, bytes_feature
 from util.metrics import plot_alignment, plot_mel, plot_spec
 
 
-def write_training_result(global_step: int, id: int, text: str, codes: np.ndarray, ground_truth_codes: np.ndarray, text : str, filename: str):
+def write_training_result(global_step: int, id: int, text: str, codes: np.ndarray, ground_truth_codes: np.ndarray, filename: str):
     example = tf.train.Example(features=tf.train.Features(feature={
         'id': int64_feature([id_]),
         'key': bytes_feature([key.encode('utf-8')]),
@@ -89,15 +89,14 @@ class MetricsSaver(tf.train.SessionRunHook):
                 (self.global_step_tensor, self.alignment_tensors, self.predicted_mel_tensor,
                  self.ground_truth_mel_tensor, self.mel_length_tensor, self.id_tensor, self.text_tensor))
             alignments = [a.astype(np.float32) for a in alignments]
-            predicted_mels = [m.astype(np.float32) for m in list(predicted_mels)]
-            ground_truth_mels = [m.astype(np.float32) for m in list(ground_truth_mels)]
+#            predicted_mels = [m.astype(np.float32) for m in list(predicted_mels)]
+#            ground_truth_mels = [m.astype(np.float32) for m in list(ground_truth_mels)]
             if self.mode == tf.estimator.ModeKeys.EVAL or self.save_training_time_metrics:
                 id_strings = ",".join([str(i) for i in ids][:10])
                 result_filename = "{}_result_step{:09d}_{}.tfrecord".format(self.mode, global_step_value, id_strings)
                 tf.logging.info("Saving a %s result for %d at %s", self.mode, global_step_value, result_filename)
-                write_training_result(global_step_value, list(ids), list(texts), predicted_mels,
-                                      ground_truth_mels, list(mel_length),
-                                      alignments,
+                write_training_result(global_step_value, ids, texts, predicted_mels,
+                                      ground_truth_mels, list(mel_length),    
                                       filename=os.path.join(self.writer.get_logdir(), result_filename))
             if self.mode == tf.estimator.ModeKeys.EVAL:
                 alignments = [[a[i] for a in alignments] for i in range(alignments[0].shape[0])]
