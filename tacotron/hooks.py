@@ -15,32 +15,16 @@ from util.tfrecord import write_tfrecord, int64_feature, bytes_feature
 from util.metrics import plot_alignment, plot_mel, plot_spec
 
 
-def write_training_result(global_step: int, id: List[int], text: List[str], predicted_mel: List[np.ndarray],
-                          ground_truth_mel: List[np.ndarray], mel_length: List[int], alignment: List[np.ndarray],
-                          filename: str):
-    batch_size = len(ground_truth_mel)
-    raw_predicted_mel = [m.tostring() for m in predicted_mel]
-    raw_ground_truth_mel = [m.tostring() for m in ground_truth_mel]
-    mel_width = ground_truth_mel[0].shape[1]
-    padded_mel_length = [m.shape[0] for m in ground_truth_mel]
-    predicted_mel_length = [m.shape[0] for m in predicted_mel]
-    raw_alignment = [a.tostring() for a in alignment]
-    alignment_source_length = [a.shape[1] for a in alignment]
-    alignment_target_length = [a.shape[2] for a in alignment]
+def write_training_result(global_step: int, id: int, text: str, codes: np.ndarray, ground_truth_codes: np.ndarray, text : str, filename: str):
     example = tf.train.Example(features=tf.train.Features(feature={
-        'global_step': int64_feature([global_step]),
-        'batch_size': int64_feature([batch_size]),
-        'id': int64_feature(id),
-        'text': bytes_feature(text),
-        'predicted_mel': bytes_feature(raw_predicted_mel),
-        'ground_truth_mel': bytes_feature(raw_ground_truth_mel),
-        'mel_length': int64_feature(padded_mel_length),
-        'mel_length_without_padding': int64_feature(mel_length),
-        'predicted_mel_length': int64_feature(predicted_mel_length),
-        'mel_width': int64_feature([mel_width]),
-        'alignment': bytes_feature(raw_alignment),
-        'alignment_source_length': int64_feature(alignment_source_length),
-        'alignment_target_length': int64_feature(alignment_target_length),
+        'id': int64_feature([id_]),
+        'key': bytes_feature([key.encode('utf-8')]),
+        'codes': bytes_feature([codes.tostring()]),
+        'codes_length': int64_feature([codes.shape[0]]),
+        'codes_width': int64_feature([codes.shape[1]]),
+        'ground_truth_codes': bytes_feature([ground_truth_codes.tostring()]),
+        'ground_truth_codes_length': int64_feature([ground_truth_codes.shape[0]]),
+        'text': bytes_feature([text.encode('utf-8')]),
     }))
     write_tfrecord(example, filename)
 
