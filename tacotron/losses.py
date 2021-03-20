@@ -7,6 +7,8 @@
 
 import tensorflow as tf
 import sys
+import numpy as np
+np.set_printoptions(threshold=sys.maxsize)
 
 
 def l1_loss(y_hat, y, mask):
@@ -53,6 +55,6 @@ def classification_loss(y_hat, y, mask):
 def binary_loss(done_hat, done, mask):
     done_hat = tf.squeeze(done_hat, axis=-1)
     done = tf.Print(done, [tf.shape(done), done], "done", summarize=-1)
-    done_hat = tf.Print(done_hat, [tf.shape(done_hat), done_hat], "done_hat", summarize=01)
+    done_hat = tf.Print(done_hat, [tf.shape(done_hat), done_hat], "done_hat", summarize=-1)
     mask = tf.Print(mask, [tf.shape(mask), mask], "mask")   
     return tf.losses.sigmoid_cross_entropy(done, done_hat, weights=mask)
